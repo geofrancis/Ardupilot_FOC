@@ -1,4 +1,23 @@
 
+void STARTUPMSG() {
+
+  mavlink_message_t msg;
+  uint8_t buf[MAVLINK_MAX_PACKET_LEN];
+  const char* name;
+
+  if (ESC == 140) { name = "Hoverboard 1 Start"; }
+  if (ESC == 141) { name = "Hoverboard 2 Start"; }
+  if (ESC == 142) { name = "Hoverboard 3 Start"; }
+  mavlink_msg_statustext_pack(system_id, ESC, &msg, 2, name, id, chunk_seq);
+  uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
+  Serial1.write(buf, len);
+}
+
+
+
+
+
+
 void request_Mavlink() {
   //Request Data from Pixhawk
   uint8_t _system_id = 255;       // id of computer which is sending the command (ground control software has id of 255)
@@ -27,8 +46,16 @@ void MavLink_RC() {
 
   while (Serial1.available()) {
     uint8_t c = Serial1.read();
-
+    // Serial.print(c);
     //Get new message
+
+
+
+
+
+
+
+
     if (mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) {
       switch (msg.msgid) {
         case MAVLINK_MSG_ID_HEARTBEAT:  // #0: Heartbeat
@@ -37,42 +64,15 @@ void MavLink_RC() {
             mavlink_heartbeat_t hb;
             mavlink_msg_heartbeat_decode(&msg, &hb);
             HBWATCH();
-
-            if ((hb.type) == 10) {
-              if ((hb.custom_mode) == 4) {
-                Serial.println("HOLD MOTOR ON");
-                active = 0;
-              }
-              if ((hb.custom_mode) != 4) {
-                Serial.println("HOLD MOTOR OFF");
-                active = 1;
-              }
-            }
-            Serial.print("\nFlight Mode: ");
-            Serial.println(hb.custom_mode);
-            BASEMODE = (hb.base_mode);
-            ;
             if (BASEMODE == 193) {
               armed = 1;
-              Serial.println("------------------------------------------------------------------------------------ARMED");
+              //Serial.println("------------------------------------------------------------------------------------ARMED");
             }
 
             if (BASEMODE == 65) {
-              Serial.println("------------------------------------------------------------------------------------DISARMED");
+              // Serial.println("------------------------------------------------------------------------------------DISARMED");
               armed = 0;
             }
-
-            //  Serial.print("Type: ");
-            //  Serial.println(hb.type);
-            //  Serial.print("Autopilot: ");
-            //  Serial.println(hb.autopilot);
-            Serial.print("Base Mode: ");
-            Serial.println(hb.base_mode);
-            //  Serial.print("System Status: ");
-            // Serial.println(hb.system_status);
-            //   Serial.print("Mavlink Version: ");
-            //   Serial.println(hb.mavlink_version);
-            //    Serial.println();
           }
           break;
 
@@ -80,10 +80,11 @@ void MavLink_RC() {
           {
             mavlink_servo_output_raw_t SERVOCHANNEL;
             mavlink_msg_servo_output_raw_decode(&msg, &SERVOCHANNEL);
-            leftoutputraw = (SERVOCHANNEL.servo1_raw);
-            rightoutputraw = (SERVOCHANNEL.servo2_raw);
-            Serial.print(rightoutputraw);
-            Serial.print(leftoutputraw);
+            leftoutputraw = (SERVOCHANNEL.servo15_raw);
+            rightoutputraw = (SERVOCHANNEL.servo16_raw);
+            FOC_Speed();
+            // Serial.print(rightoutputraw);
+            //Serial.println(leftoutputraw);
           }
           break;
       }
@@ -93,20 +94,20 @@ void MavLink_RC() {
 
 
 void FCHBC() {
-  Serial.print("FCHB ");
+  // Serial.print("FCHB ");
   // Serial.println(FCHB);
   if (FCHB == 0) {
     Serial.println("-------------------------------------------------------------NO FC HEARTBEAT");
-    Serial.println(FCOK);
-    Serial.println(FCHB);
+    // Serial.println(FCOK);
+    //  Serial.println(FCHB);
     FCOK = 0;
   }
   if (FCHB > 1) {
-    Serial.print("Rover ");
-    Serial.println(FCOK);
-    Serial.print(FCHB);
-    Serial.println("Beats ");
-    Serial.println("----------------------------------------------------------FC HEARTBEAT");
+    // Serial.print("Rover ");
+    // Serial.println(FCOK);
+    // Serial.print(FCHB);
+    // Serial.println("Beats ");
+    // Serial.println("----------------------------------------------------------FC HEARTBEAT");
     FCHB = 0;
     FCOK = 1;
   }
@@ -117,7 +118,7 @@ void FCHBC() {
 
 void HBWATCH() {
   FCHB++;
-  Serial.print("HB");
+  //Serial.print("HB");
 }
 
 
@@ -224,16 +225,6 @@ void Mavlink_Telemetry() {
   len = mavlink_msg_to_send_buffer(buf, &msg);
   Serial1.write(buf, len);
 }
-
-void STARTUPMSG(){
-
-  mavlink_message_t msg;
-  uint8_t buf[MAVLINK_MAX_PACKET_LEN];
-  mavlink_msg_statustext_pack(system_id, component_id, &msg, 2, "HOVERBOARD 1 STARTUP", id, chunk_seq);
-  uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
-}
-
 
 
 
