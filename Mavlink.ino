@@ -10,7 +10,7 @@ void STARTUPMSG() {
   if (ESC == 142) { name = "Hoverboard 3 Start"; }
   mavlink_msg_statustext_pack(system_id, ESC, &msg, 2, name, id, chunk_seq);
   uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 }
 
 
@@ -34,28 +34,21 @@ void request_Mavlink() {
   mavlink_msg_request_data_stream_pack(_system_id, _component_id, &msg, _target_system, _target_component, _req_stream_id, _req_message_rate, _start_stop);
   uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);  // Send the message (.write sends as bytes)
 
-  Serial1.write(buf, len);  //Write data to serial port
+  Serial.write(buf, len);  //Write data to serial port
 }
 
 
 
 
-void MavLink_RC() {
+void MavLink_IN() {
   mavlink_message_t msg;
   mavlink_status_t status;
 
-  while (Serial1.available()) {
+  while (Serial.available()) {
     uint8_t c = Serial1.read();
     // Serial.print(c);
     //Get new message
-
-
-
-
-
-
-
-
+    
     if (mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) {
       switch (msg.msgid) {
         case MAVLINK_MSG_ID_HEARTBEAT:  // #0: Heartbeat
@@ -80,10 +73,9 @@ void MavLink_RC() {
           {
             mavlink_servo_output_raw_t SERVOCHANNEL;
             mavlink_msg_servo_output_raw_decode(&msg, &SERVOCHANNEL);
-            leftoutputraw = (SERVOCHANNEL.servo15_raw);
-            rightoutputraw = (SERVOCHANNEL.servo16_raw);
-            FOC_Speed();
-            // Serial.print(rightoutputraw);
+            //leftoutputraw = (SERVOCHANNEL.servo1_raw);
+            //rightoutputraw = (SERVOCHANNEL.servo2_raw);
+                    // Serial.print(rightoutputraw);
             //Serial.println(leftoutputraw);
           }
           break;
@@ -136,7 +128,7 @@ void MAVLINK_HB() {
   // Serial.print("mavhb1");
   mavlink_msg_heartbeat_pack(1, ESC, &msg, type, autopilot_type, system_mode, custom_mode, system_state);
   uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 }
 
 
@@ -155,7 +147,7 @@ void Mavlink_Telemetry() {
   mavlink_msg_named_value_float_pack(1, ESC, &msg, time_boot_ms, name, value);
   uint8_t buf[MAVLINK_MAX_PACKET_LEN];
   uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 
 
   if (ESC == 140) { name = "RPML1"; }
@@ -164,7 +156,7 @@ void Mavlink_Telemetry() {
   value = velocityL;
   mavlink_msg_named_value_float_pack(1, ESC, &msg, time_boot_ms, name, value);
   len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 
 
   if (ESC == 140) { name = "VoltL1"; }
@@ -173,7 +165,7 @@ void Mavlink_Telemetry() {
   value = voltageqL;
   mavlink_msg_named_value_float_pack(1, ESC, &msg, time_boot_ms, name, value);
   len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 
   if (ESC == 140) { name = "AMPL1"; }
   if (ESC == 141) { name = "AMPL2"; }
@@ -181,7 +173,7 @@ void Mavlink_Telemetry() {
   value = currentqL;
   mavlink_msg_named_value_float_pack(1, ESC, &msg, time_boot_ms, name, value);
   len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 
 
 
@@ -191,7 +183,7 @@ void Mavlink_Telemetry() {
   value = (targetR);
   mavlink_msg_named_value_float_pack(1, ESC, &msg, time_boot_ms, name, value);
   len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 
 
   if (ESC == 140) { name = "RPMR1"; }
@@ -200,7 +192,7 @@ void Mavlink_Telemetry() {
   value = velocityR;
   mavlink_msg_named_value_float_pack(1, ESC, &msg, time_boot_ms, name, value);
   len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 
 
   if (ESC == 140) { name = "VoltR1"; }
@@ -209,7 +201,7 @@ void Mavlink_Telemetry() {
   value = voltageqR;
   mavlink_msg_named_value_float_pack(1, ESC, &msg, time_boot_ms, name, value);
   len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 
   if (ESC == 140) { name = "AMPR1"; }
   if (ESC == 141) { name = "AMPR2"; }
@@ -217,13 +209,13 @@ void Mavlink_Telemetry() {
   value = currentqR;
   mavlink_msg_named_value_float_pack(1, ESC, &msg, time_boot_ms, name, value);
   len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
   //Serial.print("V1: ");
   //Serial.println(VOLT1);
 
   mavlink_msg_named_value_float_pack(1, ESC, &msg, time_boot_ms, name, value);
   len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 }
 
 
@@ -241,5 +233,5 @@ void MAVLINK_ESC_1() {
   mavlink_msg_esc_status_pack(1, 143, &msg, 0, time_usec, rrpm, Voltage, current);
   uint8_t buf[MAVLINK_MAX_PACKET_LEN];
   uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
-  Serial1.write(buf, len);
+  Serial.write(buf, len);
 }
