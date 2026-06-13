@@ -9,35 +9,54 @@ TaskHandle_t motorTaskHandle;
 //#define ESC2
 #define ESC3
 
-int DZ = 20;  // dead
-float MAXRPM = 10;
-float target_velocity = 0;
+
 
 float Vlimit = 3;
 
-HallSensor sensor = HallSensor(23, 5, 15, 15);
-BLDCMotor motor = BLDCMotor(15);
-BLDCDriver3PWM driver = BLDCDriver3PWM(32, 33, 25, 15);
+int polepairs = 15;
 
-HallSensor sensor1 = HallSensor(13, 19, 18, 15);
-BLDCMotor motor1 = BLDCMotor(15);
-BLDCDriver3PWM driver1 = BLDCDriver3PWM(27, 26, 14, 15);
+int PWMpinRA = 32;
+int PWMpinRB = 33;
+int PWMpinRC = 25;
+
+int PWMpinLA = 27;
+int PWMpinLB = 26;
+int PWMpinLC = 14;
+
+int HALLpinRA = 23;
+int HALLpinRB = 5;
+int HALLpinRC = 15;
+
+int HALLpinLA = 13;
+int HALLpinLB = 19;
+int HALLpinLC = 18;
+
+
+
+
+int DZ = 20;  // dead
+float MAXVolts = 10;
+float target_velocity = 0;
+
+
+HallSensor sensor = HallSensor(HALLpinRA, HALLpinRB, HALLpinRC, polepairs);
+BLDCMotor motor = BLDCMotor(polepairs);
+BLDCDriver3PWM driver = BLDCDriver3PWM(PWMpinRA, PWMpinRB, PWMpinRC, polepairs);
+
+HallSensor sensor1 = HallSensor(HALLpinLA, HALLpinLB, HALLpinLC, polepairs);
+BLDCMotor motor1 = BLDCMotor(polepairs);
+BLDCDriver3PWM driver1 = BLDCDriver3PWM(PWMpinLA, PWMpinLB, PWMpinLC, polepairs);
 
 #ifdef ESC1
 int ESC = 140;  //board number
-
 #endif
 
 #ifdef ESC2
 int ESC = 141;  //board number
-
-
 #endif
 
 #ifdef ESC3
 int ESC = 142;  //board number
-
-
 #endif
 
 
